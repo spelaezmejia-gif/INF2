@@ -30,13 +30,13 @@ class Pokemon:
     @pv.setter
     def pv(self, pv):
         if not isinstance(pv, int) or pv <= 0:
-            raise ValueError("Doivent être un entier positif.")
+            raise ValueError("La valeur doit être un entier positif.")
         self.__pv = pv
 
     @atk.setter
     def atk(self, atk):
         if not isinstance(atk, int) or atk <= 0:
-            raise ValueError("Doivent être un entier positif.")
+            raise ValueError("La valeur doit être un entier positif.")
         self.__atk = atk
 
     @property
@@ -49,5 +49,15 @@ class Pokemon:
         degats = random.randint(0, self.atk)
         nouveaux_pv = autre.pv - degats
         autre.pv = nouveaux_pv
-
+        
+class PokemonFeu(Pokemon): 
+    def __init__(self,nom,pv,atk):
+        super().__init__(nom)
+        super().__init__(pv)
+        super().__init__(atk)
+    def attaquer(self,autre):
+        """------------"""
+        degats = random.randint(0, self.atk)
+        if isinstance(autre
+    
     
