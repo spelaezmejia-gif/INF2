@@ -1,7 +1,17 @@
 import tkinter as tk
 import math
 
+# -------------------------------------------------------------
+# Note au correcteur :
+# La classe RoundedButton utilisée ci-dessous a été adaptée
+# à partir d’un exemple trouvé sur GitHub. Je l’ai réutilisée
+# uniquement pour créer des boutons arrondis sous Tkinter.
+# J’ai effectué quelques modifications pour l’adapter aux
+# besoins du TP.
+# -------------------------------------------------------------
+
 class RoundedButton(tk.Canvas):
+    """Bouton Tkinter avec coins arrondis, adapté depuis un exemple trouvé sur GitHub."""
     def __init__(
         self,
         parent,
@@ -94,6 +104,7 @@ class RoundedButton(tk.Canvas):
         self.config(cursor="")
 
 class Calculatrice(tk.Tk):
+    """Fenêtre principale de la calculatrice."""
     def __init__(self):
         super().__init__()
 
@@ -157,9 +168,10 @@ class Calculatrice(tk.Tk):
         )
         self.liste_histo.pack(fill="both", expand=True)
 
-        self._creer_boutons()
+        self.creer_boutons()
 
     def appui(self, valeur: str, valeur_eval: str = None) -> None:
+        """Ajoute une valeur à l’expression en cours."""
         if valeur_eval is None:
             valeur_eval = valeur
 
@@ -169,18 +181,21 @@ class Calculatrice(tk.Tk):
         self.entree.icursor(tk.END)
 
     def clear(self) -> None:
+        """Efface l’affichage"""
         self._expr_display = ""
         self._expr_eval = ""
         self._ecran.set("")
         self.entree.icursor(tk.END)
 
     def calculer(self) -> None:
+        """Calcule l’expression et met à jour l’historique."""
         if not self._expr_eval:
             return
 
         ancienne_expr = self._expr_display
         expr_eval = self._expr_eval.replace(",", ".")
 
+        # Fonctions trigonométriques en degrés
         env = {
             "sin": lambda x: math.sin(math.radians(x)),
             "cos": lambda x: math.cos(math.radians(x)),
@@ -213,14 +228,14 @@ class Calculatrice(tk.Tk):
 
         self.entree.icursor(tk.END)
 
-    def _creer_boutons(self) -> None:
-        BTN_W, BTN_H, R = 92, 60, 14
-        PADX, PADY = 14, 12
+    def creer_boutons(self) -> None:
+        """Crée tous les boutons de la calculatrice."""
+        LARG_BOUTON, HAUT_BOUTON, RAYON_BOUTON, MARGE_X, MARGE_Y = 92, 60, 14, 14, 12
 
         gray = dict(
-            width=BTN_W,
-            height=BTN_H,
-            radius=R,
+            width=LARG_BOUTON,
+            height=HAUT_BOUTON,
+            radius=RAYON_BOUTON,
             bg="#4B4B4B",
             hover_bg="#5A5A5A",
             fg="white",
@@ -230,9 +245,9 @@ class Calculatrice(tk.Tk):
             shadow_color="#242424"
         )
         blue = dict(
-            width=BTN_W,
-            height=BTN_H,
-            radius=R,
+            width=LARG_BOUTON,
+            height=HAUT_BOUTON,
+            radius=RAYON_BOUTON,
             bg="#6A86E8",
             hover_bg="#7C95EE",
             fg="white",
@@ -242,41 +257,41 @@ class Calculatrice(tk.Tk):
             shadow_color="#242424"
         )
 
-        RoundedButton(self, "sin", command=lambda: self.appui("sin(", "sin("), **gray).grid(row=1, column=0, padx=PADX, pady=PADY)
-        RoundedButton(self, "cos", command=lambda: self.appui("cos(", "cos("), **gray).grid(row=1, column=1, padx=PADX, pady=PADY)
-        RoundedButton(self, "tan", command=lambda: self.appui("tan(", "tan("), **gray).grid(row=1, column=2, padx=PADX, pady=PADY)
-        RoundedButton(self, "π",   command=lambda: self.appui("π", "pi"),       **gray).grid(row=1, column=3, padx=PADX, pady=PADY)
+        RoundedButton(self, "sin", command=lambda: self.appui("sin(", "sin("), **gray).grid(row=1, column=0, padx=MARGE_X, pady=MARGE_Y)
+        RoundedButton(self, "cos", command=lambda: self.appui("cos(", "cos("), **gray).grid(row=1, column=1, padx=MARGE_X, pady=MARGE_Y)
+        RoundedButton(self, "tan", command=lambda: self.appui("tan(", "tan("), **gray).grid(row=1, column=2, padx=MARGE_X, pady=MARGE_Y)
+        RoundedButton(self, "π",   command=lambda: self.appui("π", "pi"),       **gray).grid(row=1, column=3, padx=MARGE_X, pady=MARGE_Y)
 
-        RoundedButton(self, "7", command=lambda: self.appui("7"), **gray).grid(row=3, column=0, padx=PADX, pady=PADY)
-        RoundedButton(self, "8", command=lambda: self.appui("8"), **gray).grid(row=3, column=1, padx=PADX, pady=PADY)
-        RoundedButton(self, "9", command=lambda: self.appui("9"), **gray).grid(row=3, column=2, padx=PADX, pady=PADY)
-        RoundedButton(self, "/", command=lambda: self.appui("/"), **blue).grid(row=3, column=3, padx=PADX, pady=PADY)
+        RoundedButton(self, "7", command=lambda: self.appui("7"), **gray).grid(row=3, column=0, padx=MARGE_X, pady=MARGE_Y)
+        RoundedButton(self, "8", command=lambda: self.appui("8"), **gray).grid(row=3, column=1, padx=MARGE_X, pady=MARGE_Y)
+        RoundedButton(self, "9", command=lambda: self.appui("9"), **gray).grid(row=3, column=2, padx=MARGE_X, pady=MARGE_Y)
+        RoundedButton(self, "/", command=lambda: self.appui("/"), **blue).grid(row=3, column=3, padx=MARGE_X, pady=MARGE_Y)
 
-        RoundedButton(self, "4", command=lambda: self.appui("4"), **gray).grid(row=4, column=0, padx=PADX, pady=PADY)
-        RoundedButton(self, "5", command=lambda: self.appui("5"), **gray).grid(row=4, column=1, padx=PADX, pady=PADY)
-        RoundedButton(self, "6", command=lambda: self.appui("6"), **gray).grid(row=4, column=2, padx=PADX, pady=PADY)
-        RoundedButton(self, "*", command=lambda: self.appui("*"), **blue).grid(row=4, column=3, padx=PADX, pady=PADY)
+        RoundedButton(self, "4", command=lambda: self.appui("4"), **gray).grid(row=4, column=0, padx=MARGE_X, pady=MARGE_Y)
+        RoundedButton(self, "5", command=lambda: self.appui("5"), **gray).grid(row=4, column=1, padx=MARGE_X, pady=MARGE_Y)
+        RoundedButton(self, "6", command=lambda: self.appui("6"), **gray).grid(row=4, column=2, padx=MARGE_X, pady=MARGE_Y)
+        RoundedButton(self, "*", command=lambda: self.appui("*"), **blue).grid(row=4, column=3, padx=MARGE_X, pady=MARGE_Y)
 
-        RoundedButton(self, "1", command=lambda: self.appui("1"), **gray).grid(row=5, column=0, padx=PADX, pady=PADY)
-        RoundedButton(self, "2", command=lambda: self.appui("2"), **gray).grid(row=5, column=1, padx=PADX, pady=PADY)
-        RoundedButton(self, "3", command=lambda: self.appui("3"), **gray).grid(row=5, column=2, padx=PADX, pady=PADY)
-        RoundedButton(self, "-", command=lambda: self.appui("-"), **blue).grid(row=5, column=3, padx=PADX, pady=PADY)
+        RoundedButton(self, "1", command=lambda: self.appui("1"), **gray).grid(row=5, column=0, padx=MARGE_X, pady=MARGE_Y)
+        RoundedButton(self, "2", command=lambda: self.appui("2"), **gray).grid(row=5, column=1, padx=MARGE_X, pady=MARGE_Y)
+        RoundedButton(self, "3", command=lambda: self.appui("3"), **gray).grid(row=5, column=2, padx=MARGE_X, pady=MARGE_Y)
+        RoundedButton(self, "-", command=lambda: self.appui("-"), **blue).grid(row=5, column=3, padx=MARGE_X, pady=MARGE_Y)
 
-        RoundedButton(self, "C", command=self.clear, **gray).grid(row=6, column=0, padx=PADX, pady=PADY)
-        RoundedButton(self, "0", command=lambda: self.appui("0"), **gray).grid(row=6, column=1, padx=PADX, pady=PADY)
-        RoundedButton(self, ",", command=lambda: self.appui(",", "."), **gray).grid(row=6, column=2, padx=PADX, pady=PADY)
-        RoundedButton(self, "+", command=lambda: self.appui("+"), **blue).grid(row=6, column=3, padx=PADX, pady=PADY)
+        RoundedButton(self, "C", command=self.clear, **gray).grid(row=6, column=0, padx=MARGE_X, pady=MARGE_Y)
+        RoundedButton(self, "0", command=lambda: self.appui("0"), **gray).grid(row=6, column=1, padx=MARGE_X, pady=MARGE_Y)
+        RoundedButton(self, ",", command=lambda: self.appui(",", "."), **gray).grid(row=6, column=2, padx=MARGE_X, pady=MARGE_Y)
+        RoundedButton(self, "+", command=lambda: self.appui("+"), **blue).grid(row=6, column=3, padx=MARGE_X, pady=MARGE_Y)
 
-        RoundedButton(self, "(",  command=lambda: self.appui("("), **gray).grid(row=2, column=0, padx=PADX, pady=PADY)
-        RoundedButton(self, ")",  command=lambda: self.appui(")"), **gray).grid(row=2, column=1, padx=PADX, pady=PADY)
-        RoundedButton(self, "√x", command=lambda: self.appui("√(", "sqrt("), **gray).grid(row=2, column=2, padx=PADX, pady=PADY)
-        RoundedButton(self, "π²", command=lambda: self.appui("π²", "pi**2"), **gray).grid(row=2, column=3, padx=PADX, pady=PADY)
+        RoundedButton(self, "(",  command=lambda: self.appui("("), **gray).grid(row=2, column=0, padx=MARGE_X, pady=MARGE_Y)
+        RoundedButton(self, ")",  command=lambda: self.appui(")"), **gray).grid(row=2, column=1, padx=MARGE_X, pady=MARGE_Y)
+        RoundedButton(self, "√x", command=lambda: self.appui("√(", "sqrt("), **gray).grid(row=2, column=2, padx=MARGE_X, pady=MARGE_Y)
+        RoundedButton(self, "π²", command=lambda: self.appui("π²", "pi**2"), **gray).grid(row=2, column=3, padx=MARGE_X, pady=MARGE_Y)
 
         RoundedButton(
             self,
             "=",
             command=self.calculer,
-            width=4 * BTN_W + 3 * (2 * PADX),
+            width=4 * LARG_BOUTON + 3 * (2 * MARGE_X),
             height=70,
             radius=16,
             bg="#6A86E8",
@@ -286,7 +301,7 @@ class Calculatrice(tk.Tk):
             shadow=True,
             shadow_offset=2,
             shadow_color="#242424"
-        ).grid(row=7, column=0, columnspan=4, padx=PADX, pady=(PADY, 16))
+        ).grid(row=7, column=0, columnspan=4, padx=MARGE_X, pady=(MARGE_Y, 16))
 
 def main() -> None:
     calc = Calculatrice()
