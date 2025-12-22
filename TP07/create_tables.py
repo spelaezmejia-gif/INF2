@@ -23,6 +23,10 @@ def creer_tables():
                        nom TEXT NOT NULL ,
                        prenom TEXT  NOT NULL,
                        semestre TEXT,
+                       numero_rue TEXT  ,
+                       nom_rue TEXT  ,
+                       code_postal TEXT  ,
+                       ville TEXT,
                        logement_id int not null,
                        FOREIGN KEY (logement_id) REFERENCES logement(id))'''
         curseur.execute(requete_etudiant)
@@ -31,7 +35,10 @@ def creer_tables():
                                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                                type  TEXT,
                                labellisation INTEGER,
-                               PRO TEXT,
+                               numero_rue TEXT  ,
+                               nom_rue TEXT  ,
+                               code_postal TEXT  ,
+                               ville TEXT,
                                logeur_id INTEGER NOT NULL ,
                                FOREIGN KEY(logeur_id) REFERENCES logeur(id))'''
         curseur.execute(requete_logement)
@@ -49,5 +56,6 @@ def creer_tables():
 
 if __name__ == '__main__':
     creer_tables()
+
 
 
