@@ -8,123 +8,76 @@ def creer_tables():
     connexion = sqlite3.connect("alesc.sqlite")
     curseur = connexion.cursor()
 
-    # Table logeur (Responsable du logement) [cite: 14]
-    curseur.execute('''CREATE TABLE IF NOT EXISTS logeur (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                                          nom TEXT NOT NULL,
+    # Table Logeurs
+    curseur.execute('''CREATE TABLE IF NOT EXISTS logeurs (nom TEXT NOT NULL,
                                                           prenom TEXT NOT NULL,
+                                                          numero_rue TEXT,
                                                           nom_rue TEXT,
                                                           code_postal TEXT,
-                                                          ville TEXT)''')
+                                                          ville TEXT,
+                                                          id INTEGER PRIMARY KEY AUTOINCREMENT)''')
 
-    # Table logement (Type: chambre, studio, etc.) [cite: 7, 10]
-    curseur.execute('''CREATE TABLE IF NOT EXISTS logement( id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                                            type TEXT,
-                                                            labellisation INTEGER,
-                                                            numero_rue TEXT,
+    # Table logements
+    curseur.execute('''CREATE TABLE IF NOT EXISTS logements (numero_rue TEXT,
                                                             nom_rue TEXT,
                                                             code_postal TEXT,
                                                             ville TEXT,
+                                                            label TEXT,
+                                                            nom_logeur TEXT,
+                                                            prenom_logeur TEXT,
+                                                            type_logement TEXT,
+                                                            id INTEGER PRIMARY KEY AUTOINCREMENT,
                                                             logeur_id INTEGER NOT NULL,
                                                             FOREIGN KEY (logeur_id) REFERENCES logeur (id))''')
 
-    # Table etudiant (Ex: Ménan) [cite: 2]
-    curseur.execute('''CREATE TABLE IF NOT EXISTS etudiant ( id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                                                             nom TEXT NOT NULL,
+    # Table Etudiants
+    curseur.execute('''CREATE TABLE IF NOT EXISTS etudiants (nom TEXT NOT NULL,
                                                              prenom TEXT NOT NULL,
                                                              semestre TEXT,
                                                              numero_rue TEXT,
                                                              nom_rue TEXT,
                                                              code_postal TEXT,
                                                              ville TEXT,
+                                                             id INTEGER PRIMARY KEY AUTOINCREMENT, 
                                                              logement_id INTEGER NOT NULL,
                                                              FOREIGN KEY (logement_id) REFERENCES logement(id))''')
 
     connexion.commit()
     connexion.close()
     print("Structure SQLite créée avec succès.")
+def conv_excel_to_numpy(file):
+    F=pd.read_excel(file)
+    F.to_numpy()
+    return F
 
-
-def peupler_base_numpy(file_lgr, file_lgm, file_etd):
-    """Importe les données via des matrices NumPy [cite: 19, 20]"""
+def peupler_base_numpy(Matrice1,Matrice2,Matrice3):
+    """Importe les données via des matrices NumPy"""
     connexion = sqlite3.connect("alesc.sqlite")
     curseur = connexion.cursor()
-
-    try:
-        # 1. TRAITEMENT DES LOGEURS
-        df_lgr = pd.read_csv(file_lgr)
-        # Conversion explicite en matrice NumPy pour l'insertion [cite: 20]
-        matrice_lgr = np.array(df_lgr)
-        curseur.executemany(
-            "INSERT INTO logeur (nom, prenom, numero_rue, nom_rue, code_postal, ville) VALUES (?,?,?,?,?,?)",
-            matrice_lgr.tolist()
-        )
-        connexion.commit()
-
-        # 2. TRAITEMENT DES LOGEMENTS (Mapping Logeur -> Logement)
-        df_lgm = pd.read_csv(file_lgm)
-        # On récupère les IDs créés pour faire la liaison [cite: 5, 15]
-        df_map_lgr = pd.read_sql("SELECT id as logeur_id, nom, prenom FROM logeur", connexion)
-
-        # Jointure Pandas pour retrouver le logeur_id par le nom/prénom
-        df_lgm_final = df_lgm.merge(df_map_lgr, left_on=['nom_logeur', 'prenom_logeur'], right_on=['nom', 'prenom'])
-
-        # Sélection des colonnes et transformation en matrice NumPy
-        selection_lgm = df_lgm_final[
-            ['type_logement', 'label', 'numero_rue', 'nom_rue', 'code_postal', 'ville', 'logeur_id']]
-        matrice_lgm = selection_lgm.to_numpy()
-
-        curseur.executemany(
-            "INSERT INTO logement (type, labellisation, numero_rue, nom_rue, code_postal, ville, logeur_id) VALUES (?,?,?,?,?,?,?)",
-            matrice_lgm.tolist()
-        )
-        connexion.commit()
-
-        # 3. TRAITEMENT DES ETUDIANTS (Mapping Logement -> Etudiant via l'adresse)
-        df_etd = pd.read_csv(file_etd)
-        # On récupère les IDs des logements pour l'affectation [cite: 4, 15]
-        df_map_lgm = pd.read_sql("SELECT id as logement_id, numero_rue, nom_rue, code_postal FROM logement", connexion)
-
-        # Jointure sur l'adresse (numero, rue, CP) pour identifier le logement
-        df_etd_final = df_etd.merge(df_map_lgm, on=['numero_rue', 'nom_rue', 'code_postal'])
-
-        # Matrice NumPy finale pour les étudiants (dont Ménan [cite: 2])
-        selection_etd = df_etd_final[
-            ['nom', 'prenom', 'semestre', 'numero_rue', 'nom_rue', 'code_postal', 'ville', 'logement_id']]
-        matrice_etd = np.array(selection_etd)
-
-        curseur.executemany(
-            "INSERT INTO etudiant (nom, prenom, semestre, numero_rue, nom_rue, code_postal, ville, logement_id) VALUES (?,?,?,?,?,?,?,?)",
-            matrice_etd.tolist()
-        )
-        connexion.commit()
-        print(f"Importation terminée : {len(matrice_etd)} étudiants insérés.")
-
-    except Exception as e:
-        print(f"Erreur : {e}")
-    finally:
-        connexion.close()
+    liste_de_valeurs_1 = [tuple(f) for f in Matrice1]
+    liste_de_valeurs_2= [tuple(f) for f in Matrice2]
+    liste_de_valeurs_3= [tuple(f) for f in Matrice3]
 
 
-def verifier_coherence():
-    """Vérifie que les liens entre tables existent bien"""
-    connexion = sqlite3.connect("alesc.sqlite")
-    df_verif = pd.read_sql('''
-                           SELECT e.nom as Etudiant, l.type as Logement, o.nom as Logeur
-                           FROM etudiant e
-                                    JOIN logement l ON e.logement_id = l.id
-                                    JOIN logeur o ON l.logeur_id = o.id LIMIT 5
-                           ''', connexion)
-    print("\n--- Aperçu des données liées ---")
-    print(df_verif)
+    instruction1 = f"INSERT INTO logeurs VALUES(?,?,?,?,?,?)"
+    instruction2 = f"INSERT INTO logements VALUES(?,?,?,?,?,?,?,?)"
+    instruction3 = f"INSERT INTO etudiants VALUES(?,?,?,?,?,?,?)"
+
+    curseur.executemany(instruction1,liste_de_valeurs_1)
+    curseur.executemany(instruction2, liste_de_valeurs_2)
+    curseur.executemany(instruction3, liste_de_valeurs_3)
+
+    connexion.commit()
     connexion.close()
 
 
-if __name__ == '__main__':
-    # Fichiers sources détectés
-    f1 = "logeurs.xlsx"
-    f2 = "logements.xlsx"
-    f3 = "etudiants.xlsx"
-
+def main():
     creer_tables()
-    peupler_base_numpy(f1, f2, f3)
-    verifier_coherence()
+    Matrice1 = conv_excel_to_numpy("logeurs.xlsx")
+    Matrice2 = conv_excel_to_numpy("logements.xlsx")
+    Matrice3 = conv_excel_to_numpy("etudiants.xlsx")
+    peupler_base_numpy(Matrice1,Matrice2,Matrice3)
+
+
+if __name__ == '__main__':
+    main()
